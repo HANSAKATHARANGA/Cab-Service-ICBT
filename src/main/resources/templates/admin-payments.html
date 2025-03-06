@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <title>Admin Dashboard</title>
+    <title>View Payments</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <link th:href="@{/css/styles.css}" rel="stylesheet"/>
 </head>
@@ -29,8 +29,20 @@
     </div>
 </nav>
 <div class="container">
-    <h1>Admin Dashboard</h1>
-    <p>Welcome to the admin panel. Use the navigation bar to manage the system.</p>
+    <h1>View Payments</h1>
+    <table class="table table-striped">
+        <thead>
+        <tr><th>ID</th><th>Booking Number</th><th>Amount</th><th>Payment Date</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="payment : ${payments}">
+            <td th:text="${payment.id}"></td>
+            <td th:text="${payment.booking?.bookingNumber}"></td>
+            <td th:text="${payment.amount}"></td>
+            <td th:text="${payment.paymentDate}"></td>
+        </tr>
+        </tbody>
+    </table>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
