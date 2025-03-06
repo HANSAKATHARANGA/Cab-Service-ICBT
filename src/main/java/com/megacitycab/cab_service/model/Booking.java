@@ -11,7 +11,7 @@ public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @NotBlank(message = "Booking number is required")
+//    @NotBlank(message = "Booking number is required")
     private String bookingNumber;
     @ManyToOne
     private Customer customer;
@@ -27,6 +27,7 @@ public class Booking {
 
     public Booking() {
         this.dateTime = LocalDateTime.now(); // Default to current date and time
+        this.status = "Pending"; // Default status
     }
 
     public Long getId() { return id; }

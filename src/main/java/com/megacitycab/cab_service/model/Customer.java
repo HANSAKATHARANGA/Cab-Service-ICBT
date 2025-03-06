@@ -9,8 +9,6 @@ public class Customer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @NotBlank(message = "Registration number is required")
-    private String regNumber;
     @NotBlank(message = "Name is required")
     private String name;
     @NotBlank(message = "Address is required")
@@ -24,8 +22,6 @@ public class Customer {
     public Customer() {}
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-    public String getRegNumber() { return regNumber; }
-    public void setRegNumber(String regNumber) { this.regNumber = regNumber; }
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
     public String getAddress() { return address; }

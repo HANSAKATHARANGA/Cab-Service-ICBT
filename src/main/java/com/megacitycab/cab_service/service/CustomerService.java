@@ -6,20 +6,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Random;
 
 @Service
 public class CustomerService {
     @Autowired
     private BookingRepository bookingRepository;
     @Autowired
-    private CarRepository carRepository;
+    private CarRepository carRepository; // Assumed to exist
     @Autowired
     private PaymentRepository paymentRepository;
     @Autowired
     private CustomerRepository customerRepository;
     @Autowired
-    private UserRepository userRepository;
+    private UserRepository userRepository; // Assumed to exist
 
     public List<Booking> getCustomerBookings(String username) {
         User user = userRepository.findByUsername(username);
@@ -50,8 +52,18 @@ public class CustomerService {
             if (booking.getDateTime() == null) {
                 booking.setDateTime(LocalDateTime.now());
             }
+            // Auto-generate booking number
+            String bookingNumber = generateBookingNumber();
+            booking.setBookingNumber(bookingNumber);
+            booking.setStatus("Pending"); // Ensure status is set
             bookingRepository.save(booking);
         }
+    }
+
+    private String generateBookingNumber() {
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        String random = String.format("%04d", new Random().nextInt(10000));
+        return "BOOK-" + timestamp + "-" + random; // e.g., BOOK-20250306123456-7890
     }
 
     public List<Car> getAvailableCars() {

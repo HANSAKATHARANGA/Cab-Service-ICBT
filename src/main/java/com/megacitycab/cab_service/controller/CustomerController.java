@@ -74,8 +74,8 @@ public class CustomerController {
     }
 
     @GetMapping("/payment")
-    public String showPaymentForm(@RequestParam Long bookingId, Model model) {
-        Booking booking = customerService.getBooking(bookingId);
+    public String showPaymentForm(@RequestParam Long id, Model model) {
+        Booking booking = customerService.getBooking(id);
         if (booking == null || !booking.getStatus().equals("Pending")) {
             return "redirect:/customer/bookings";
         }
