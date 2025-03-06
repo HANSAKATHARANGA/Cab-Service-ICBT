@@ -9,10 +9,10 @@
 		<relativePath/>
 	</parent>
 	<groupId>com.megacitycab</groupId>
-	<artifactId>cab-service</artifactId>
+	<artifactId>auth-system</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>cab-service</name>
-	<description>ICBT Assignment</description>
+	<name>auth-system</name>
+	<description>Authentication and Authorization System</description>
 	<properties>
 		<java.version>17</java.version>
 	</properties>
@@ -32,6 +32,11 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.thymeleaf.extras</groupId>
+			<artifactId>thymeleaf-extras-springsecurity6</artifactId>
+			<version>3.1.2.RELEASE</version> <!-- Match Thymeleaf version -->
 		</dependency>
 		<dependency>
 			<groupId>com.mysql</groupId>
