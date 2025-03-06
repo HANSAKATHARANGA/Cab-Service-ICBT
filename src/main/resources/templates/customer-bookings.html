@@ -42,7 +42,7 @@
             <td th:text="${booking.totalAmount}"></td>
             <td>
                 <a th:href="@{/customer/bookings/cancel/{id}(id=${booking.id})}" class="btn btn-sm btn-danger" th:if="${booking.status == 'Pending'}">Cancel</a>
-                <a th:href="@{/customer/payment?id=${booking.id}}" class="btn btn-sm btn-primary" th:if="${booking.status == 'Pending'}">Pay Now</a>
+                <a th:href="@{/customer/payment(id=${booking.id})}" class="btn btn-sm btn-primary" th:if="${booking.status == 'Pending'}">Pay Now</a>
             </td>
         </tr>
         </tbody>

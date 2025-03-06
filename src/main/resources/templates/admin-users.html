@@ -52,11 +52,6 @@
         </div>
         <div id="customerFields" style="display: none;">
             <div class="mb-3">
-                <label for="regNumber" class="form-label">Registration Number</label>
-                <input type="text" class="form-control" id="regNumber" th:field="${customer.regNumber}" required/>
-                <div class="text-danger" th:errors="${customer.regNumber}"></div>
-            </div>
-            <div class="mb-3">
                 <label for="name" class="form-label">Name</label>
                 <input type="text" class="form-control" id="name" th:field="${customer.name}" required/>
                 <div class="text-danger" th:errors="${customer.name}"></div>
