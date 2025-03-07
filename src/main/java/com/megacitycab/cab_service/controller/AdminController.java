@@ -133,7 +133,6 @@ public class AdminController {
             model.addAttribute("selectedRole", role);
             return "admin-users";
         }
-        // Check if username exists
         if (adminService.usernameExists(username)) {
             model.addAttribute("error", "Username already exists. Please choose a different username.");
             model.addAttribute("users", adminService.getAllUsers());
@@ -179,34 +178,27 @@ public class AdminController {
             model.addAttribute("selectedRole", role);
             return "admin-users";
         }
-        User user = adminService.getUser(id);
-        if (user == null) {
+
+        User existingUser = adminService.getUser(id);
+        if (existingUser == null) {
             return "redirect:/admin/users";
         }
-        // Check if username changed and already exists
-        if (!user.getUsername().equals(username) && adminService.usernameExists(username)) {
+
+        if (!existingUser.getUsername().equals(username) && adminService.usernameExists(username)) {
             model.addAttribute("error", "Username already exists. Please choose a different username.");
             model.addAttribute("users", adminService.getAllUsers());
-            model.addAttribute("user", user);
+            model.addAttribute("user", existingUser);
             model.addAttribute("customer", customer);
             model.addAttribute("selectedRole", role);
             return "admin-users";
         }
-        user.setUsername(username);
-        user.setPassword(password); // Will be encoded in service
-        adminService.updateUser(user); // Update user roles and customer separately if needed
-        if (role.equalsIgnoreCase("customer")) {
-            Customer existingCustomer = customerRepository.findByUser(user);
-            if (existingCustomer != null) {
-                existingCustomer.setName(customer.getName());
-                existingCustomer.setAddress(customer.getAddress());
-                existingCustomer.setNic(customer.getNic());
-                customerRepository.save(existingCustomer);
-            } else {
-                customer.setUser(user);
-                customerRepository.save(customer);
-            }
+
+        existingUser.setUsername(username);
+        if (!password.isEmpty()) {
+            existingUser.setPassword(password); // Will be encoded in service
         }
+
+        adminService.updateUser(existingUser, role, customer);
         return "redirect:/admin/users";
     }
 

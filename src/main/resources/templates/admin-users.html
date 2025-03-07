@@ -51,9 +51,9 @@
             <div class="error-message" id="usernameError">Username must be 4-20 alphanumeric characters</div>
         </div>
         <div class="mb-3">
-            <label for="password" class="form-label">Password</label>
-            <input type="password" class="form-control" id="password" name="password" th:value="${user.password}"
-                   required pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+            <label for="password" class="form-label">Password (leave blank to keep unchanged)</label>
+            <input type="password" class="form-control" id="password" name="password"
+                   pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
                    title="Password must be 8+ characters with 1 number, 1 uppercase, 1 lowercase"/>
             <div class="error-message" id="passwordError">Password must be 8+ characters with number, uppercase, and lowercase</div>
         </div>
@@ -131,11 +131,11 @@
             usernameError.style.display = 'none';
         }
 
-        // Password validation
+        // Password validation (only if provided)
         const password = document.getElementById('password');
         const passwordError = document.getElementById('passwordError');
         const passwordPattern = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
-        if (!password.value || !passwordPattern.test(password.value)) {
+        if (password.value && !passwordPattern.test(password.value)) {
             password.classList.add('is-invalid');
             passwordError.style.display = 'block';
             isValid = false;
@@ -158,7 +158,6 @@
 
         // Customer fields validation (if role is customer)
         if (role.value === 'customer') {
-            // Name validation
             const name = document.getElementById('name');
             const nameError = document.getElementById('nameError');
             const namePattern = /^[A-Za-z\s]{2,50}$/;
@@ -171,7 +170,6 @@
                 nameError.style.display = 'none';
             }
 
-            // Address validation
             const address = document.getElementById('address');
             const addressError = document.getElementById('addressError');
             if (!address.value || address.value.length < 5 || address.value.length > 100) {
@@ -183,7 +181,6 @@
                 addressError.style.display = 'none';
             }
 
-            // NIC validation
             const nic = document.getElementById('nic');
             const nicError = document.getElementById('nicError');
             const nicPattern = /^[0-9]{9}[vV]$/;
@@ -232,7 +229,6 @@
         const isCustomer = this.value === 'customer';
         customerFields.style.display = isCustomer ? 'block' : 'none';
 
-        // Make customer fields required only when role is customer
         ['name', 'address', 'nic'].forEach(fieldId => {
             const field = document.getElementById(fieldId);
             if (field) field.required = isCustomer;

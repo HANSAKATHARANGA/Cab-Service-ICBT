@@ -58,12 +58,49 @@ public class AdminService {
         }
         return savedUser;
     }
+
     public List<User> getAllUsers() { return userRepository.findAll(); }
     public User getUser(Long id) { return userRepository.findById(id).orElse(null); }
-    public User updateUser(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
+
+    public User updateUser(User user, String roleName, Customer customer) {
+        // Preserve existing password if not provided
+        if (user.getPassword() == null || user.getPassword().isEmpty()) {
+            User existingUser = userRepository.findById(user.getId()).orElseThrow();
+            user.setPassword(existingUser.getPassword());
+        } else {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+        }
+
+        // Update roles
+        Role role = roleRepository.findByName("ROLE_" + roleName.toUpperCase());
+        if (role == null) {
+            role = new Role("ROLE_" + roleName.toUpperCase());
+            roleRepository.save(role);
+        }
+        Set<Role> roles = new HashSet<>();
+        roles.add(role);
+        user.setRoles(roles);
+
+        // Save user
+        User updatedUser = userRepository.save(user);
+
+        // Handle customer data if role is customer
+        if (roleName.equalsIgnoreCase("customer") && customer != null) {
+            Customer existingCustomer = customerRepository.findByUser(updatedUser);
+            if (existingCustomer != null) {
+                existingCustomer.setName(customer.getName());
+                existingCustomer.setAddress(customer.getAddress());
+                existingCustomer.setNic(customer.getNic());
+                customerRepository.save(existingCustomer);
+            } else {
+                customer.setUser(updatedUser);
+                customerRepository.save(customer);
+            }
+        }
+
+        return updatedUser;
     }
+
     public void deleteUser(Long id) { userRepository.deleteById(id); }
 
     // Bookings
