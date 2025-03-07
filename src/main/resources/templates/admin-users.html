@@ -41,57 +41,51 @@
 </nav>
 <div class="container">
     <h1>Manage Users</h1>
-    <form th:action="@{${user.id == null ? '/admin/users/create' : '/admin/users/update'}}"
-          th:object="${user}" method="post" class="mb-4" id="userForm" novalidate>
-        <input type="hidden" th:field="*{id}"/>
+    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+    <form th:action="@{${user.id == null ? '/admin/users/create' : '/admin/users/update'}}" method="post" class="mb-4" id="userForm" novalidate>
+        <input type="hidden" name="id" th:value="${user.id}"/>
         <div class="mb-3">
             <label for="username" class="form-label">Username</label>
-            <input type="text" class="form-control" id="username" th:field="*{username}"
-                   required pattern="[a-zA-Z0-9]{4,20}"
-                   title="Username must be 4-20 alphanumeric characters"/>
+            <input type="text" class="form-control" id="username" name="username" th:value="${user.username}"
+                   required pattern="[a-zA-Z0-9]{4,20}" title="Username must be 4-20 alphanumeric characters"/>
             <div class="error-message" id="usernameError">Username must be 4-20 alphanumeric characters</div>
-            <div class="text-danger" th:errors="*{username}"></div>
         </div>
         <div class="mb-3">
             <label for="password" class="form-label">Password</label>
-            <input type="password" class="form-control" id="password" th:field="*{password}"
+            <input type="password" class="form-control" id="password" name="password" th:value="${user.password}"
                    required pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
                    title="Password must be 8+ characters with 1 number, 1 uppercase, 1 lowercase"/>
             <div class="error-message" id="passwordError">Password must be 8+ characters with number, uppercase, and lowercase</div>
-            <div class="text-danger" th:errors="*{password}"></div>
         </div>
         <div class="mb-3">
             <label for="role" class="form-label">Role</label>
             <select class="form-select" id="role" name="role" required>
                 <option value="">Select a role</option>
-                <option value="customer" th:selected="${role == 'customer'}">Customer</option>
-                <option value="moderator" th:selected="${role == 'moderator'}">Moderator</option>
-                <option value="admin" th:selected="${role == 'admin'}">Admin</option>
+                <option value="customer" th:selected="${selectedRole == 'customer'}">Customer</option>
+                <option value="moderator" th:selected="${selectedRole == 'moderator'}">Moderator</option>
+                <option value="admin" th:selected="${selectedRole == 'admin'}">Admin</option>
             </select>
             <div class="error-message" id="roleError">Please select a role</div>
         </div>
         <div id="customerFields" style="display: none;">
             <div class="mb-3">
                 <label for="name" class="form-label">Name</label>
-                <input type="text" class="form-control" id="name" th:field="${customer.name}"
-                       pattern="[A-Za-z\s]{2,50}"
-                       title="Name must be 2-50 characters, letters and spaces only"/>
+                <input type="text" class="form-control" id="name" name="name" th:value="${customer.name}"
+                       pattern="[A-Za-z\s]{2,50}" title="Name must be 2-50 characters, letters and spaces only"/>
                 <div class="error-message" id="nameError">Name must be 2-50 characters (letters and spaces only)</div>
                 <div class="text-danger" th:errors="${customer.name}"></div>
             </div>
             <div class="mb-3">
                 <label for="address" class="form-label">Address</label>
-                <input type="text" class="form-control" id="address" th:field="${customer.address}"
-                       minlength="5" maxlength="100"
-                       title="Address must be 5-100 characters"/>
+                <input type="text" class="form-control" id="address" name="address" th:value="${customer.address}"
+                       minlength="5" maxlength="100" title="Address must be 5-100 characters"/>
                 <div class="error-message" id="addressError">Address must be 5-100 characters</div>
                 <div class="text-danger" th:errors="${customer.address}"></div>
             </div>
             <div class="mb-3">
                 <label for="nic" class="form-label">NIC</label>
-                <input type="text" class="form-control" id="nic" th:field="${customer.nic}"
-                       pattern="[0-9]{9}[vV]"
-                       title="NIC must be 9 digits followed by v or V"/>
+                <input type="text" class="form-control" id="nic" name="nic" th:value="${customer.nic}"
+                       pattern="[0-9]{9}[vV]" title="NIC must be 9 digits followed by v or V"/>
                 <div class="error-message" id="nicError">NIC must be 9 digits followed by v or V</div>
                 <div class="text-danger" th:errors="${customer.nic}"></div>
             </div>
