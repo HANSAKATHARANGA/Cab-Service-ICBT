@@ -110,6 +110,11 @@ public class AdminController {
     @PostMapping("/users/create")
     public String createUser(@Valid @ModelAttribute User user, @Valid @ModelAttribute Customer customer,
                              @RequestParam String role, BindingResult result, Model model) {
+        System.out.println("******************************************************");
+        System.out.println("******************************************************");
+        System.out.println("test");
+        System.out.println("******************************************************");
+        System.out.println("******************************************************");
         if (result.hasErrors()) {
             model.addAttribute("users", adminService.getAllUsers());
             return "admin-users";

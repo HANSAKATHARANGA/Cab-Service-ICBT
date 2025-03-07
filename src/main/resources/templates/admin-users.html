@@ -4,6 +4,17 @@
     <title>Manage Users</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <link th:href="@{/css/styles.css}" rel="stylesheet"/>
+    <style>
+        .error-message {
+            color: #dc3545;
+            font-size: 0.875em;
+            margin-top: 0.25rem;
+            display: none;
+        }
+        .is-invalid {
+            border-color: #dc3545;
+        }
+    </style>
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
@@ -30,40 +41,58 @@
 </nav>
 <div class="container">
     <h1>Manage Users</h1>
-    <form th:action="@{${user.id == null ? '/admin/users/create' : '/admin/users/update'}}" th:object="${user}" method="post" class="mb-4">
+    <form th:action="@{${user.id == null ? '/admin/users/create' : '/admin/users/update'}}"
+          th:object="${user}" method="post" class="mb-4" id="userForm" novalidate>
         <input type="hidden" th:field="*{id}"/>
         <div class="mb-3">
             <label for="username" class="form-label">Username</label>
-            <input type="text" class="form-control" id="username" th:field="*{username}" required/>
+            <input type="text" class="form-control" id="username" th:field="*{username}"
+                   required pattern="[a-zA-Z0-9]{4,20}"
+                   title="Username must be 4-20 alphanumeric characters"/>
+            <div class="error-message" id="usernameError">Username must be 4-20 alphanumeric characters</div>
             <div class="text-danger" th:errors="*{username}"></div>
         </div>
         <div class="mb-3">
             <label for="password" class="form-label">Password</label>
-            <input type="password" class="form-control" id="password" th:field="*{password}" required/>
+            <input type="password" class="form-control" id="password" th:field="*{password}"
+                   required pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+                   title="Password must be 8+ characters with 1 number, 1 uppercase, 1 lowercase"/>
+            <div class="error-message" id="passwordError">Password must be 8+ characters with number, uppercase, and lowercase</div>
             <div class="text-danger" th:errors="*{password}"></div>
         </div>
         <div class="mb-3">
             <label for="role" class="form-label">Role</label>
             <select class="form-select" id="role" name="role" required>
-                <option value="customer">Customer</option>
-                <option value="moderator">Moderator</option>
-                <option value="admin">Admin</option>
+                <option value="">Select a role</option>
+                <option value="customer" th:selected="${role == 'customer'}">Customer</option>
+                <option value="moderator" th:selected="${role == 'moderator'}">Moderator</option>
+                <option value="admin" th:selected="${role == 'admin'}">Admin</option>
             </select>
+            <div class="error-message" id="roleError">Please select a role</div>
         </div>
         <div id="customerFields" style="display: none;">
             <div class="mb-3">
                 <label for="name" class="form-label">Name</label>
-                <input type="text" class="form-control" id="name" th:field="${customer.name}" required/>
+                <input type="text" class="form-control" id="name" th:field="${customer.name}"
+                       pattern="[A-Za-z\s]{2,50}"
+                       title="Name must be 2-50 characters, letters and spaces only"/>
+                <div class="error-message" id="nameError">Name must be 2-50 characters (letters and spaces only)</div>
                 <div class="text-danger" th:errors="${customer.name}"></div>
             </div>
             <div class="mb-3">
                 <label for="address" class="form-label">Address</label>
-                <input type="text" class="form-control" id="address" th:field="${customer.address}" required/>
+                <input type="text" class="form-control" id="address" th:field="${customer.address}"
+                       minlength="5" maxlength="100"
+                       title="Address must be 5-100 characters"/>
+                <div class="error-message" id="addressError">Address must be 5-100 characters</div>
                 <div class="text-danger" th:errors="${customer.address}"></div>
             </div>
             <div class="mb-3">
                 <label for="nic" class="form-label">NIC</label>
-                <input type="text" class="form-control" id="nic" th:field="${customer.nic}" required pattern="[0-9]{9}[vV]"/>
+                <input type="text" class="form-control" id="nic" th:field="${customer.nic}"
+                       pattern="[0-9]{9}[vV]"
+                       title="NIC must be 9 digits followed by v or V"/>
+                <div class="error-message" id="nicError">NIC must be 9 digits followed by v or V</div>
                 <div class="text-danger" th:errors="${customer.nic}"></div>
             </div>
         </div>
@@ -91,9 +120,142 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    document.getElementById('role').addEventListener('change', function() {
-        document.getElementById('customerFields').style.display = this.value === 'customer' ? 'block' : 'none';
+    document.getElementById('userForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        let isValid = true;
+
+        // Username validation
+        const username = document.getElementById('username');
+        const usernameError = document.getElementById('usernameError');
+        const usernamePattern = /^[a-zA-Z0-9]{4,20}$/;
+        if (!username.value || !usernamePattern.test(username.value)) {
+            username.classList.add('is-invalid');
+            usernameError.style.display = 'block';
+            isValid = false;
+        } else {
+            username.classList.remove('is-invalid');
+            usernameError.style.display = 'none';
+        }
+
+        // Password validation
+        const password = document.getElementById('password');
+        const passwordError = document.getElementById('passwordError');
+        const passwordPattern = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
+        if (!password.value || !passwordPattern.test(password.value)) {
+            password.classList.add('is-invalid');
+            passwordError.style.display = 'block';
+            isValid = false;
+        } else {
+            password.classList.remove('is-invalid');
+            passwordError.style.display = 'none';
+        }
+
+        // Role validation
+        const role = document.getElementById('role');
+        const roleError = document.getElementById('roleError');
+        if (!role.value) {
+            role.classList.add('is-invalid');
+            roleError.style.display = 'block';
+            isValid = false;
+        } else {
+            role.classList.remove('is-invalid');
+            roleError.style.display = 'none';
+        }
+
+        // Customer fields validation (if role is customer)
+        if (role.value === 'customer') {
+            // Name validation
+            const name = document.getElementById('name');
+            const nameError = document.getElementById('nameError');
+            const namePattern = /^[A-Za-z\s]{2,50}$/;
+            if (!name.value || !namePattern.test(name.value)) {
+                name.classList.add('is-invalid');
+                nameError.style.display = 'block';
+                isValid = false;
+            } else {
+                name.classList.remove('is-invalid');
+                nameError.style.display = 'none';
+            }
+
+            // Address validation
+            const address = document.getElementById('address');
+            const addressError = document.getElementById('addressError');
+            if (!address.value || address.value.length < 5 || address.value.length > 100) {
+                address.classList.add('is-invalid');
+                addressError.style.display = 'block';
+                isValid = false;
+            } else {
+                address.classList.remove('is-invalid');
+                addressError.style.display = 'none';
+            }
+
+            // NIC validation
+            const nic = document.getElementById('nic');
+            const nicError = document.getElementById('nicError');
+            const nicPattern = /^[0-9]{9}[vV]$/;
+            if (!nic.value || !nicPattern.test(nic.value)) {
+                nic.classList.add('is-invalid');
+                nicError.style.display = 'block';
+                isValid = false;
+            } else {
+                nic.classList.remove('is-invalid');
+                nicError.style.display = 'none';
+            }
+        }
+
+        if (isValid) {
+            this.submit();
+        }
     });
+
+    // Real-time validation
+    ['username', 'password', 'name', 'address', 'nic'].forEach(fieldId => {
+        const element = document.getElementById(fieldId);
+        if (element) {
+            element.addEventListener('input', function() {
+                const errorElement = document.getElementById(fieldId + 'Error');
+                let pattern;
+                if (fieldId === 'username') pattern = /^[a-zA-Z0-9]{4,20}$/;
+                else if (fieldId === 'password') pattern = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
+                else if (fieldId === 'name') pattern = /^[A-Za-z\s]{2,50}$/;
+                else if (fieldId === 'address') pattern = /^.{5,100}$/;
+                else if (fieldId === 'nic') pattern = /^[0-9]{9}[vV]$/;
+
+                if (this.value && !pattern.test(this.value)) {
+                    this.classList.add('is-invalid');
+                    errorElement.style.display = 'block';
+                } else {
+                    this.classList.remove('is-invalid');
+                    errorElement.style.display = 'none';
+                }
+            });
+        }
+    });
+
+    // Role change handler
+    document.getElementById('role').addEventListener('change', function() {
+        const customerFields = document.getElementById('customerFields');
+        const isCustomer = this.value === 'customer';
+        customerFields.style.display = isCustomer ? 'block' : 'none';
+
+        // Make customer fields required only when role is customer
+        ['name', 'address', 'nic'].forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (field) field.required = isCustomer;
+        });
+    });
+
+    // Initial state
+    window.onload = function() {
+        const role = document.getElementById('role');
+        const customerFields = document.getElementById('customerFields');
+        const isCustomer = role.value === 'customer';
+        customerFields.style.display = isCustomer ? 'block' : 'none';
+        ['name', 'address', 'nic'].forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (field) field.required = isCustomer;
+        });
+    };
 </script>
 </body>
 </html>

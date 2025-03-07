@@ -4,19 +4,36 @@
     <title>Register</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <link th:href="@{/css/styles.css}" rel="stylesheet"/>
+    <style>
+        .error-message {
+            color: #dc3545;
+            font-size: 0.875em;
+            margin-top: 0.25rem;
+            display: none;
+        }
+        .is-invalid {
+            border-color: #dc3545;
+        }
+    </style>
 </head>
 <body>
 <div class="container">
     <h1>Register</h1>
     <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
-    <form th:action="@{/register}" method="post">
+    <form th:action="@{/register}" method="post" id="registerForm" novalidate>
         <div class="mb-3">
             <label for="username" class="form-label">Username</label>
-            <input type="text" class="form-control" id="username" name="username" th:value="${user.username}" required/>
+            <input type="text" class="form-control" id="username" name="username"
+                   th:value="${user.username}" required pattern="[a-zA-Z0-9]{4,20}"
+                   title="Username must be 4-20 alphanumeric characters"/>
+            <div class="error-message" id="usernameError">Username must be 4-20 alphanumeric characters</div>
         </div>
         <div class="mb-3">
             <label for="password" class="form-label">Password</label>
-            <input type="password" class="form-control" id="password" name="password" required/>
+            <input type="password" class="form-control" id="password" name="password"
+                   required pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+                   title="Password must be at least 8 characters with 1 number, 1 uppercase, 1 lowercase"/>
+            <div class="error-message" id="passwordError">Password must be 8+ characters with number, uppercase, and lowercase</div>
         </div>
         <div class="mb-3">
             <label for="role" class="form-label">Role</label>
@@ -25,19 +42,26 @@
                 <option value="moderator" th:selected="${selectedRole == 'moderator'}">Moderator</option>
                 <option value="admin" th:selected="${selectedRole == 'admin'}">Admin</option>
             </select>
+            <div class="error-message" id="roleError">Please select a role</div>
         </div>
         <div id="customerFields" style="display: none;">
             <div class="mb-3">
                 <label for="name" class="form-label">Name</label>
-                <input type="text" class="form-control" id="name" name="name" th:value="${customer.name}"/>
+                <input type="text" class="form-control" id="name" name="name"
+                       th:value="${customer.name}" pattern="[A-Za-z\s]{2,50}"/>
+                <div class="error-message" id="nameError">Name must be 2-50 letters</div>
             </div>
             <div class="mb-3">
                 <label for="address" class="form-label">Address</label>
-                <input type="text" class="form-control" id="address" name="address" th:value="${customer.address}"/>
+                <input type="text" class="form-control" id="address" name="address"
+                       th:value="${customer.address}"/>
+                <div class="error-message" id="addressError">Please enter a valid address</div>
             </div>
             <div class="mb-3">
                 <label for="nic" class="form-label">NIC</label>
-                <input type="text" class="form-control" id="nic" name="nic" th:value="${customer.nic}" pattern="[0-9]{9}[vV]"/>
+                <input type="text" class="form-control" id="nic" name="nic"
+                       th:value="${customer.nic}" pattern="[0-9]{9}[vV]"/>
+                <div class="error-message" id="nicError">NIC must be 9 digits followed by v or V</div>
             </div>
         </div>
         <button type="submit" class="btn btn-primary">Register</button>
@@ -45,13 +69,100 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    document.getElementById('role').addEventListener('change', function() {
-        document.getElementById('customerFields').style.display = this.value === 'customer' ? 'block' : 'none';
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        let isValid = true;
+
+        // Username validation
+        const username = document.getElementById('username');
+        const usernameError = document.getElementById('usernameError');
+        const usernamePattern = /^[a-zA-Z0-9]{4,20}$/;
+        if (!usernamePattern.test(username.value)) {
+            username.classList.add('is-invalid');
+            usernameError.style.display = 'block';
+            isValid = false;
+        } else {
+            username.classList.remove('is-invalid');
+            usernameError.style.display = 'none';
+        }
+
+        // Password validation
+        const password = document.getElementById('password');
+        const passwordError = document.getElementById('passwordError');
+        const passwordPattern = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
+        if (!passwordPattern.test(password.value)) {
+            password.classList.add('is-invalid');
+            passwordError.style.display = 'block';
+            isValid = false;
+        } else {
+            password.classList.remove('is-invalid');
+            passwordError.style.display = 'none';
+        }
+
+        // Role validation
+        const role = document.getElementById('role');
+        const roleError = document.getElementById('roleError');
+        if (!role.value) {
+            role.classList.add('is-invalid');
+            roleError.style.display = 'block';
+            isValid = false;
+        } else {
+            role.classList.remove('is-invalid');
+            roleError.style.display = 'none';
+        }
+
+        // Customer fields validation (if role is customer)
+        if (role.value === 'customer') {
+            const name = document.getElementById('name');
+            const nameError = document.getElementById('nameError');
+            const namePattern = /^[A-Za-z\s]{2,50}$/;
+            if (!name.value || !namePattern.test(name.value)) {
+                name.classList.add('is-invalid');
+                nameError.style.display = 'block';
+                isValid = false;
+            } else {
+                name.classList.remove('is-invalid');
+                nameError.style.display = 'none';
+            }
+
+            const address = document.getElementById('address');
+            const addressError = document.getElementById('addressError');
+            if (!address.value || address.value.length < 5) {
+                address.classList.add('is-invalid');
+                addressError.style.display = 'block';
+                isValid = false;
+            } else {
+                address.classList.remove('is-invalid');
+                addressError.style.display = 'none';
+            }
+
+            const nic = document.getElementById('nic');
+            const nicError = document.getElementById('nicError');
+            const nicPattern = /^[0-9]{9}[vV]$/;
+            if (!nic.value || !nicPattern.test(nic.value)) {
+                nic.classList.add('is-invalid');
+                nicError.style.display = 'block';
+                isValid = false;
+            } else {
+                nic.classList.remove('is-invalid');
+                nicError.style.display = 'none';
+            }
+        }
+
+        if (isValid) {
+            this.submit();
+        }
     });
-    // Ensure customer fields are shown if customer role is selected on page load
+
+    document.getElementById('role').addEventListener('change', function() {
+        document.getElementById('customerFields').style.display =
+            this.value === 'customer' ? 'block' : 'none';
+    });
+
     window.onload = function() {
         var role = document.getElementById('role').value;
-        document.getElementById('customerFields').style.display = role === 'customer' ? 'block' : 'none';
+        document.getElementById('customerFields').style.display =
+            role === 'customer' ? 'block' : 'none';
     };
 </script>
 </body>

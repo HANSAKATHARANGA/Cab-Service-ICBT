@@ -4,6 +4,17 @@
     <title>Manage Drivers</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <link th:href="@{/css/styles.css}" rel="stylesheet"/>
+    <style>
+        .error-message {
+            color: #dc3545;
+            font-size: 0.875em;
+            margin-top: 0.25rem;
+            display: none;
+        }
+        .is-invalid {
+            border-color: #dc3545;
+        }
+    </style>
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
@@ -30,16 +41,23 @@
 </nav>
 <div class="container">
     <h1>Manage Drivers</h1>
-    <form th:action="@{${driver.id == null ? '/admin/drivers/create' : '/admin/drivers/update'}}" th:object="${driver}" method="post" class="mb-4">
+    <form th:action="@{${driver.id == null ? '/admin/drivers/create' : '/admin/drivers/update'}}"
+          th:object="${driver}" method="post" class="mb-4" id="driverForm" novalidate>
         <input type="hidden" th:field="*{id}"/>
         <div class="mb-3">
             <label for="name" class="form-label">Name</label>
-            <input type="text" class="form-control" id="name" th:field="*{name}" required/>
+            <input type="text" class="form-control" id="name" th:field="*{name}"
+                   required pattern="[A-Za-z\s]{2,50}"
+                   title="Name must be 2-50 characters, letters and spaces only"/>
+            <div class="error-message" id="nameError">Name must be 2-50 characters (letters and spaces only)</div>
             <div class="text-danger" th:errors="*{name}"></div>
         </div>
         <div class="mb-3">
             <label for="licenseNumber" class="form-label">License Number</label>
-            <input type="text" class="form-control" id="licenseNumber" th:field="*{licenseNumber}" required/>
+            <input type="text" class="form-control" id="licenseNumber" th:field="*{licenseNumber}"
+                   required pattern="[A-Z0-9]{6,12}"
+                   title="License must be 6-12 alphanumeric characters"/>
+            <div class="error-message" id="licenseError">License must be 6-12 alphanumeric characters</div>
             <div class="text-danger" th:errors="*{licenseNumber}"></div>
         </div>
         <div class="mb-3">
@@ -75,5 +93,59 @@
     </table>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.getElementById('driverForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        let isValid = true;
+
+        // Name validation
+        const name = document.getElementById('name');
+        const nameError = document.getElementById('nameError');
+        const namePattern = /^[A-Za-z\s]{2,50}$/;
+        if (!name.value || !namePattern.test(name.value)) {
+            name.classList.add('is-invalid');
+            nameError.style.display = 'block';
+            isValid = false;
+        } else {
+            name.classList.remove('is-invalid');
+            nameError.style.display = 'none';
+        }
+
+        // License Number validation
+        const licenseNumber = document.getElementById('licenseNumber');
+        const licenseError = document.getElementById('licenseError');
+        const licensePattern = /^[A-Z0-9]{6,12}$/;
+        if (!licenseNumber.value || !licensePattern.test(licenseNumber.value)) {
+            licenseNumber.classList.add('is-invalid');
+            licenseError.style.display = 'block';
+            isValid = false;
+        } else {
+            licenseNumber.classList.remove('is-invalid');
+            licenseError.style.display = 'none';
+        }
+
+        if (isValid) {
+            this.submit();
+        }
+    });
+
+    // Real-time validation
+    ['name', 'licenseNumber'].forEach(fieldId => {
+        document.getElementById(fieldId).addEventListener('input', function() {
+            const errorElement = document.getElementById(fieldId + 'Error');
+            const pattern = fieldId === 'name' ?
+                /^[A-Za-z\s]{2,50}$/ :
+                /^[A-Z0-9]{6,12}$/;
+
+            if (this.value && !pattern.test(this.value)) {
+                this.classList.add('is-invalid');
+                errorElement.style.display = 'block';
+            } else {
+                this.classList.remove('is-invalid');
+                errorElement.style.display = 'none';
+            }
+        });
+    });
+</script>
 </body>
 </html>
