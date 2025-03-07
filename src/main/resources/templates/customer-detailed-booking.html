@@ -25,7 +25,7 @@
         </div>
     </div>
 </nav>
-<div class="container">
+<div class="container mt-5 pt-5">
     <h1>Make a New Booking</h1>
     <form th:action="@{/customer/make-booking}" th:object="${booking}" method="post" class="mb-4">
         <div class="mb-3">
@@ -47,6 +47,14 @@
                 <option value="Suburbs">Suburbs</option>
             </select>
             <div class="text-danger" th:errors="*{destination}"></div>
+        </div>
+        <div class="mb-3">
+            <label for="driver" class="form-label">Select Driver</label>
+            <select class="form-control" id="driver" th:field="*{driver}" required>
+                <option value="">Select a Driver</option>
+                <option th:each="driver : ${drivers}" th:value="${driver.id}" th:text="${driver.name + ' (' + driver.licenseNumber + ')'}"></option>
+            </select>
+            <div class="text-danger" th:errors="*{driver}"></div>
         </div>
         <div class="mb-3">
             <label for="dateTime" class="form-label">Pickup Date and Time</label>

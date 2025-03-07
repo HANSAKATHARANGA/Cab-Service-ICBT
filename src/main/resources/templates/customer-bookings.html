@@ -25,11 +25,21 @@
         </div>
     </div>
 </nav>
-<div class="container">
+<div class="container mt-5 pt-5">
     <h1>My Bookings</h1>
     <table class="table table-striped">
         <thead>
-        <tr><th>ID</th><th>Booking Number</th><th>From</th><th>Destination</th><th>Date & Time</th><th>Status</th><th>Total Amount</th><th>Actions</th></tr>
+        <tr>
+            <th>ID</th>
+            <th>Booking Number</th>
+            <th>From</th>
+            <th>Destination</th>
+            <th>Driver</th>
+            <th>Date & Time</th>
+            <th>Status</th>
+            <th>Total Amount</th>
+            <th>Actions</th>
+        </tr>
         </thead>
         <tbody>
         <tr th:each="booking : ${bookings}">
@@ -37,6 +47,7 @@
             <td th:text="${booking.bookingNumber}"></td>
             <td th:text="${booking.fromLocation}"></td>
             <td th:text="${booking.destination}"></td>
+            <td th:text="${booking.driver?.name}"></td>
             <td th:text="${booking.dateTime}"></td>
             <td th:text="${booking.status}"></td>
             <td th:text="${booking.totalAmount}"></td>

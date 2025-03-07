@@ -12,16 +12,12 @@ import java.util.Random;
 
 @Service
 public class CustomerService {
-    @Autowired
-    private BookingRepository bookingRepository;
-    @Autowired
-    private CarRepository carRepository; // Assumed to exist
-    @Autowired
-    private PaymentRepository paymentRepository;
-    @Autowired
-    private CustomerRepository customerRepository;
-    @Autowired
-    private UserRepository userRepository; // Assumed to exist
+    @Autowired private BookingRepository bookingRepository;
+    @Autowired private CarRepository carRepository;
+    @Autowired private PaymentRepository paymentRepository;
+    @Autowired private CustomerRepository customerRepository;
+    @Autowired private UserRepository userRepository;
+    @Autowired private DriverRepository driverRepository;
 
     public List<Booking> getCustomerBookings(String username) {
         User user = userRepository.findByUsername(username);
@@ -48,26 +44,33 @@ public class CustomerService {
         User user = userRepository.findByUsername(username);
         if (user != null) {
             Customer customer = customerRepository.findByUser(user);
-            booking.setCustomer(customer);
+            booking.setCustomer(customer); // Still set here for consistency, though pre-set in controller
             if (booking.getDateTime() == null) {
                 booking.setDateTime(LocalDateTime.now());
             }
-            // Auto-generate booking number
-            String bookingNumber = generateBookingNumber();
-            booking.setBookingNumber(bookingNumber);
-            booking.setStatus("Pending"); // Ensure status is set
+            booking.setBookingNumber(generateBookingNumber());
+            booking.setStatus("Pending");
             bookingRepository.save(booking);
+            Driver driver = booking.getDriver();
+            if (driver != null) {
+                driver.setAvailable(false);
+                driverRepository.save(driver);
+            }
         }
     }
 
     private String generateBookingNumber() {
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
         String random = String.format("%04d", new Random().nextInt(10000));
-        return "BOOK-" + timestamp + "-" + random; // e.g., BOOK-20250306123456-7890
+        return "BOOK-" + timestamp + "-" + random;
     }
 
     public List<Car> getAvailableCars() {
         return carRepository.findAll().stream().filter(Car::isAvailable).toList();
+    }
+
+    public List<Driver> getAvailableDrivers() {
+        return driverRepository.findByAvailableTrue();
     }
 
     public Booking getBooking(Long id) {
@@ -88,6 +91,11 @@ public class CustomerService {
                     paymentRepository.save(payment);
                     booking.setStatus("Completed");
                     bookingRepository.save(booking);
+                    Driver driver = booking.getDriver();
+                    if (driver != null) {
+                        driver.setAvailable(true);
+                        driverRepository.save(driver);
+                    }
                 }
             }
         }
@@ -102,5 +110,13 @@ public class CustomerService {
                     .toList();
         }
         return List.of();
+    }
+
+    public Customer getCustomerByUsername(String username) {
+        User user = userRepository.findByUsername(username);
+        if (user != null) {
+            return customerRepository.findByUser(user);
+        }
+        return null;
     }
 }

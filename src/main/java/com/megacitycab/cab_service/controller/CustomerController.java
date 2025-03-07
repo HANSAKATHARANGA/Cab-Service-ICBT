@@ -21,6 +21,19 @@ public class CustomerController {
     @Autowired
     private CustomerService customerService;
 
+    // Pre-populate Booking with customer before binding
+    @ModelAttribute("booking")
+    public Booking prePopulateBooking(Principal principal) {
+        Booking booking = new Booking();
+        String username = principal.getName();
+        Customer customer = customerService.getCustomerByUsername(username);
+        if (customer != null) {
+            booking.setCustomer(customer);
+        }
+        booking.setDateTime(LocalDateTime.now());
+        return booking;
+    }
+
     @GetMapping("/dashboard")
     public String dashboard(Principal principal, Model model) {
         String username = principal.getName();
@@ -44,21 +57,34 @@ public class CustomerController {
 
     @GetMapping("/make-booking")
     public String showDetailedBookingForm(Model model) {
-        Booking booking = new Booking();
-        booking.setDateTime(LocalDateTime.now());
-        model.addAttribute("booking", booking);
         model.addAttribute("cars", customerService.getAvailableCars());
+        model.addAttribute("drivers", customerService.getAvailableDrivers());
         return "customer-detailed-booking";
     }
 
     @PostMapping("/make-booking")
     public String makeBooking(@Valid @ModelAttribute Booking booking, BindingResult result,
                               @RequestParam(required = false) String payNow, Principal principal, Model model) {
-        if (result.hasErrors()) {
+        String username = principal.getName();
+        Customer customer = customerService.getCustomerByUsername(username);
+        if (customer == null) {
+            model.addAttribute("error", "User not associated with a customer profile.");
             model.addAttribute("cars", customerService.getAvailableCars());
+            model.addAttribute("drivers", customerService.getAvailableDrivers());
             return "customer-detailed-booking";
         }
-        String username = principal.getName();
+
+        if (result.hasErrors()) {
+            System.out.println("******************************************************");
+            System.out.println("******************************************************");
+            System.out.println(result);
+            System.out.println("******************************************************");
+            System.out.println("******************************************************");
+            model.addAttribute("cars", customerService.getAvailableCars());
+            model.addAttribute("drivers", customerService.getAvailableDrivers());
+            return "customer-detailed-booking";
+        }
+
         booking.setBookingNumber(generateBookingNumber());
         booking.setStatus("Pending");
         if (booking.getDateTime() == null) {
@@ -74,7 +100,7 @@ public class CustomerController {
     }
 
     @GetMapping("/payment")
-    public String showPaymentForm(@RequestParam Long id, Model model) {
+    public String showPaymentForm(@RequestParam("id") Long id, Model model) {
         Booking booking = customerService.getBooking(id);
         if (booking == null || !booking.getStatus().equals("Pending")) {
             return "redirect:/customer/bookings";
